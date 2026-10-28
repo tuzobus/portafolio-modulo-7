@@ -63,6 +63,9 @@ for class_name in CLASS_NAMES:
 
         md5 = hashlib.md5(path.read_bytes()).hexdigest()
 
+        # Escala de grises con luminancia perceptual para brillo y contraste
+        gray = arr @ np.array([0.299, 0.587, 0.114])
+
         records.append(
             {
                 "class": class_name,
@@ -71,6 +74,8 @@ for class_name in CLASS_NAMES:
                 "height": height,
                 "mode": mode,
                 "md5": md5,
+                "brightness": gray.mean() / 255.0,
+                "contrast": gray.std() / 255.0,
             }
         )
 
@@ -266,5 +271,65 @@ global_mean = (
 
 print("\nMedia global por canal RGB en escala 0 a 1:")
 print(global_mean.round(4).values)
+
+# Brillo y contraste por imagen
+# El brillo es la media de la escala de grises
+# El contraste es la desviación estándar (0 a 1)
+print("\nBrillo y contraste por clase (0 a 1):")
+print(
+    df.groupby("class")[["brightness", "contrast"]]
+    .describe()
+    .reindex(CLASS_NAMES)
+    .round(4)
+    .to_string()
+)
+
+bc_stats = (
+    df.groupby("class")[["brightness", "contrast"]]
+    .agg(["mean", "std"])
+    .reindex(CLASS_NAMES)
+)
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+for ax, col, label, color in zip(
+    axes,
+    ["brightness", "contrast"],
+    ["Brillo", "Contraste"],
+    ["tab:gray", "tab:purple"],
+):
+    mean = bc_stats[(col, "mean")]
+    std = bc_stats[(col, "std")]
+    ax.bar(
+        x,
+        mean,
+        yerr=[np.minimum(std, mean), std],
+        color=color,
+        alpha=0.8,
+        capsize=2,
+    )
+    ax.set_xticks(x, CLASS_NAMES, rotation=45, ha="right")
+    ax.set_xlabel("Clase")
+    ax.set_ylabel(f"{label} (0 a 1)")
+    ax.set_title(f"{label} por clase")
+
+plt.suptitle("Media y desviación estándar de brillo y contraste por clase")
+plt.tight_layout()
+plt.savefig(
+    EDA_RESULTS_DIR / "class_brightness_contrast.png", dpi=300, bbox_inches="tight"
+)
+plt.close()
+
+print("\nImágenes más oscuras:")
+print(
+    df.nsmallest(5, "brightness")[["class", "file", "brightness"]].to_string(
+        index=False
+    )
+)
+
+print("\nImágenes más claras:")
+print(
+    df.nlargest(5, "brightness")[["class", "file", "brightness"]].to_string(index=False)
+)
 
 print(f"\n Resultados guardados en: {EDA_RESULTS_DIR}")
