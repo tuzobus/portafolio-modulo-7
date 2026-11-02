@@ -3,33 +3,20 @@ import shutil
 
 import numpy as np
 import pandas as pd
-from pathlib import Path
+from PIL import Image
 
-RAW_DATA_DIR = Path(__file__).resolve().parent / "data" / "EuroSAT_RGB"
-SPLIT_DIR = Path(__file__).resolve().parent / "data" / "split"
-TRAIN_DIR = SPLIT_DIR / "train"
-VAL_DIR = SPLIT_DIR / "validation"
-TEST_DIR = SPLIT_DIR / "test"
-RESULTS_DIR = Path(__file__).resolve().parent / "results"
-
-TRAIN_RATIO = 0.60
-VAL_RATIO = 0.20
-
-CLASS_NAMES = [
-    "AnnualCrop",
-    "Forest",
-    "HerbaceousVegetation",
-    "Highway",
-    "Industrial",
-    "Pasture",
-    "PermanentCrop",
-    "Residential",
-    "River",
-    "SeaLake",
-]
-
-SEED = 67
-
+from config import (
+    RAW_DATA_DIR,
+    SPLIT_DIR,
+    TRAIN_DIR,
+    VAL_DIR,
+    TEST_DIR,
+    RESULTS_DIR,
+    TRAIN_RATIO,
+    VAL_RATIO,
+    CLASS_NAMES,
+    SEED,
+)
 
 # SETUP DE LOS DATOS
 # Las imágenes se copian a las carpetas train / validation / test con el ratio
@@ -57,10 +44,11 @@ if SPLIT_DIR.exists():
     print(f"Borrando partición anterior en {SPLIT_DIR}")
     shutil.rmtree(SPLIT_DIR)
 
-rng = np.random.RandomState(SEED)
-split_rows = []
-seen_hashes = set()
-n_skipped_duplicates = 0
+# REVISIÓN DE IMÁGENES
+# si una imagen no se puede abrir se descarta, y también se calcula
+# hash md5 para encontrar duplicados
+records = []
+corrupt_files = []
 
 for class_name in CLASS_NAMES:
     class_dir = RAW_DATA_DIR / class_name
@@ -70,15 +58,50 @@ for class_name in CLASS_NAMES:
         p for p in class_dir.iterdir() if p.suffix.lower() in [".jpg", ".jpeg"]
     )
 
-    # se descartan duplicados por hash md5
-    unique_files = []
     for path in all_files:
-        md5 = hashlib.md5(path.read_bytes()).hexdigest()
-        if md5 in seen_hashes:
-            n_skipped_duplicates += 1
+        try:
+            with Image.open(path) as img:
+                img.convert("RGB")
+        except Exception:
+            corrupt_files.append(str(path))
             continue
-        seen_hashes.add(md5)
-        unique_files.append(path.name)
+
+        md5 = hashlib.md5(path.read_bytes()).hexdigest()
+        records.append({"class": class_name, "file": path.name, "md5": md5})
+
+files_df = pd.DataFrame(records)
+
+# si una misma imagen sale en dos clases se descartan todas sus copias
+# si se repite dentro de misma clase se conserva solo la primera copia
+classes_per_hash = files_df.groupby("md5")["class"].nunique()
+conflicting_hashes = classes_per_hash[classes_per_hash > 1].index
+is_conflicting = files_df["md5"].isin(conflicting_hashes)
+is_repeated = files_df.duplicated(subset="md5", keep="first")
+
+clean_df = files_df[~is_conflicting & ~is_repeated]
+
+print("\nImágenes corruptas descartadas:")
+print(len(corrupt_files))
+for path in corrupt_files:
+    print(path)
+
+print("\nImágenes repetidas en clases distintas descartadas:")
+print(int(is_conflicting.sum()))
+
+print("\nImágenes repetidas dentro de misma clase descartadas:")
+print(int((is_repeated & ~is_conflicting).sum()))
+
+print("\nImágenes válidas y únicas:")
+print(len(clean_df), "de", len(files_df) + len(corrupt_files))
+
+
+# PARTICIÓN Y COPIA A LAS CARPETAS
+rng = np.random.RandomState(SEED)
+split_rows = []
+
+for class_name in CLASS_NAMES:
+    class_dir = RAW_DATA_DIR / class_name
+    unique_files = clean_df[clean_df["class"] == class_name]["file"].tolist()
 
     train_files, val_files, test_files = stratified_split_files(unique_files, rng)
 
@@ -105,8 +128,6 @@ for class_name in CLASS_NAMES:
 split_df = pd.DataFrame(split_rows)
 split_df["total"] = split_df[["train", "validation", "test"]].sum(axis=1)
 
-print("\nDuplicados exactos descartados:")
-print(n_skipped_duplicates)
 
 print("\nImágenes por clase en cada partición:")
 print(split_df.to_string(index=False))
@@ -134,5 +155,4 @@ print("train and test:", len(train_set & test_set))
 print("validation and test:", len(val_set & test_set))
 
 split_df.to_csv(OUTPUT_DIR / "split_counts.csv", index=False)
-print(f"\nConteos guardados en: {OUTPUT_DIR / 'split_counts.csv'}")
-print(f"Partición creada en: {SPLIT_DIR}")
+print(f"Particiones creadas en: {SPLIT_DIR}")
