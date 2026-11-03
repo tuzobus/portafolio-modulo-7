@@ -1,0 +1,10 @@
+class,train,validation,test,total
+Agaricus,210,70,71,351
+Amanita,448,149,151,748
+Boletus,642,214,214,1070
+Cortinarius,500,166,168,834
+Entoloma,218,72,74,364
+Hygrocybe,189,63,63,315
+Lactarius,903,301,301,1505
+Russula,687,229,229,1145
+Suillus,186,62,63,311
