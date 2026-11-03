@@ -49,6 +49,7 @@ if SPLIT_DIR.exists():
 # hash md5 para encontrar duplicados
 records = []
 corrupt_files = []
+blank_files = []
 
 for class_name in CLASS_NAMES:
     class_dir = RAW_DATA_DIR / class_name
@@ -61,9 +62,14 @@ for class_name in CLASS_NAMES:
     for path in all_files:
         try:
             with Image.open(path) as img:
-                img.convert("RGB")
+                arr = np.asarray(img.convert("RGB"))
         except Exception:
             corrupt_files.append(str(path))
+            continue
+
+        # imágenes de un solo color
+        if arr.std() == 0:
+            blank_files.append(str(path))
             continue
 
         md5 = hashlib.md5(path.read_bytes()).hexdigest()
@@ -90,6 +96,11 @@ print(int(is_conflicting.sum()))
 
 print("\nImágenes repetidas dentro de misma clase descartadas:")
 print(int((is_repeated & ~is_conflicting).sum()))
+
+print("\nImágenes vacías descartadas:")
+print(len(blank_files))
+for path in blank_files:
+    print(path)
 
 print("\nImágenes válidas y únicas:")
 print(len(clean_df), "de", len(files_df) + len(corrupt_files))
