@@ -1,0 +1,191 @@
+
+Versión de TensorFlow: 2.21.0
+Dispositivos disponibles: [PhysicalDevice(name='/physical_device:CPU:0', device_type='CPU')]
+Found 3983 images belonging to 9 classes.
+Found 3983 images belonging to 9 classes.
+Found 1326 images belonging to 9 classes.
+Found 1334 images belonging to 9 classes.
+
+Índice asignado a cada clase:
+{'Agaricus': 0, 'Amanita': 1, 'Boletus': 2, 'Cortinarius': 3, 'Entoloma': 4, 'Hygrocybe': 5, 'Lactarius': 6, 'Russula': 7, 'Suillus': 8}
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ conv2d (Conv2D)                 │ (None, 150, 150, 32)   │           896 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d (MaxPooling2D)    │ (None, 75, 75, 32)     │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_1 (Conv2D)               │ (None, 75, 75, 64)     │        18,496 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d_1 (MaxPooling2D)  │ (None, 37, 37, 64)     │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_2 (Conv2D)               │ (None, 37, 37, 128)    │        73,856 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d_2 (MaxPooling2D)  │ (None, 18, 18, 128)    │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ flatten (Flatten)               │ (None, 41472)          │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 128)            │     5,308,544 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_1 (Dense)                 │ (None, 9)              │         1,161 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 5,402,953 (20.61 MB)
+ Trainable params: 5,402,953 (20.61 MB)
+ Non-trainable params: 0 (0.00 B)
+Epoch 1/25
+125/125 - 35s - 281ms/step - accuracy: 0.2518 - loss: 1.9821 - val_accuracy: 0.2632 - val_loss: 1.9302
+Epoch 2/25
+125/125 - 37s - 300ms/step - accuracy: 0.3304 - loss: 1.8297 - val_accuracy: 0.3665 - val_loss: 1.7505
+Epoch 3/25
+125/125 - 40s - 320ms/step - accuracy: 0.3947 - loss: 1.6660 - val_accuracy: 0.3771 - val_loss: 1.7389
+Epoch 4/25
+125/125 - 42s - 334ms/step - accuracy: 0.4569 - loss: 1.5034 - val_accuracy: 0.4238 - val_loss: 1.6474
+Epoch 5/25
+125/125 - 42s - 339ms/step - accuracy: 0.5581 - loss: 1.2388 - val_accuracy: 0.4155 - val_loss: 1.7183
+Epoch 6/25
+125/125 - 43s - 344ms/step - accuracy: 0.7015 - loss: 0.8440 - val_accuracy: 0.3929 - val_loss: 1.9929
+Epoch 7/25
+125/125 - 43s - 343ms/step - accuracy: 0.8531 - loss: 0.4351 - val_accuracy: 0.3688 - val_loss: 2.5776
+Epoch 8/25
+125/125 - 44s - 354ms/step - accuracy: 0.9475 - loss: 0.1662 - val_accuracy: 0.3876 - val_loss: 3.4145
+Epoch 9/25
+125/125 - 44s - 352ms/step - accuracy: 0.9887 - loss: 0.0490 - val_accuracy: 0.3680 - val_loss: 4.0064
+Epoch 10/25
+125/125 - 44s - 353ms/step - accuracy: 0.9882 - loss: 0.0413 - val_accuracy: 0.3914 - val_loss: 4.5226
+Epoch 11/25
+125/125 - 45s - 358ms/step - accuracy: 0.9955 - loss: 0.0219 - val_accuracy: 0.3703 - val_loss: 4.3969
+Epoch 12/25
+125/125 - 45s - 358ms/step - accuracy: 0.9890 - loss: 0.0357 - val_accuracy: 0.3725 - val_loss: 4.3018
+Epoch 13/25
+125/125 - 46s - 365ms/step - accuracy: 0.9761 - loss: 0.0792 - val_accuracy: 0.3801 - val_loss: 4.1964
+Epoch 14/25
+125/125 - 45s - 361ms/step - accuracy: 0.9927 - loss: 0.0280 - val_accuracy: 0.3846 - val_loss: 4.6448
+Epoch 15/25
+125/125 - 45s - 360ms/step - accuracy: 0.9982 - loss: 0.0066 - val_accuracy: 0.3952 - val_loss: 5.0762
+Epoch 16/25
+125/125 - 45s - 363ms/step - accuracy: 1.0000 - loss: 8.7952e-04 - val_accuracy: 0.3891 - val_loss: 5.2275
+Epoch 17/25
+125/125 - 44s - 355ms/step - accuracy: 1.0000 - loss: 3.4725e-04 - val_accuracy: 0.3891 - val_loss: 5.3549
+Epoch 18/25
+125/125 - 44s - 351ms/step - accuracy: 1.0000 - loss: 2.5110e-04 - val_accuracy: 0.3937 - val_loss: 5.4652
+Epoch 19/25
+125/125 - 45s - 360ms/step - accuracy: 1.0000 - loss: 1.9908e-04 - val_accuracy: 0.3922 - val_loss: 5.5527
+Epoch 20/25
+125/125 - 46s - 369ms/step - accuracy: 1.0000 - loss: 1.6481e-04 - val_accuracy: 0.3914 - val_loss: 5.6339
+Epoch 21/25
+125/125 - 45s - 364ms/step - accuracy: 1.0000 - loss: 1.3959e-04 - val_accuracy: 0.3937 - val_loss: 5.7016
+Epoch 22/25
+125/125 - 45s - 363ms/step - accuracy: 1.0000 - loss: 1.2014e-04 - val_accuracy: 0.3944 - val_loss: 5.7702
+Epoch 23/25
+125/125 - 45s - 359ms/step - accuracy: 1.0000 - loss: 1.0486e-04 - val_accuracy: 0.3929 - val_loss: 5.8298
+Epoch 24/25
+125/125 - 45s - 363ms/step - accuracy: 1.0000 - loss: 9.2475e-05 - val_accuracy: 0.3922 - val_loss: 5.8830
+Epoch 25/25
+125/125 - 45s - 361ms/step - accuracy: 1.0000 - loss: 8.2021e-05 - val_accuracy: 0.3937 - val_loss: 5.9358
+
+Tiempo de entrenamiento: 18.19 minutos
+Modelo guardado en: /Users/ivanfv/desarrollodesoftware/tc3009c/periodo2/portafolio-modulo-7/models/base_cnn.keras
+
+Diagnóstico de las curvas:
+Menor val_loss: 1.6474 en la época 4
+val_loss en la última época: 5.9358
+Mayor val_accuracy: 0.4238 en la época 4
+train accuracy en la última época: 1.0000
+
+============================================================
+EVALUACIÓN DEL MODELO BASE
+============================================================
+
+TRAIN
+Loss: 0.0001
+Accuracy: 1.0000
+Macro-F1: 1.0000
+
+Reporte de clasificación:
+              precision    recall  f1-score   support
+
+    Agaricus     1.0000    1.0000    1.0000       210
+     Amanita     1.0000    1.0000    1.0000       448
+     Boletus     1.0000    1.0000    1.0000       642
+ Cortinarius     1.0000    1.0000    1.0000       500
+    Entoloma     1.0000    1.0000    1.0000       218
+   Hygrocybe     1.0000    1.0000    1.0000       189
+   Lactarius     1.0000    1.0000    1.0000       903
+     Russula     1.0000    1.0000    1.0000       687
+     Suillus     1.0000    1.0000    1.0000       186
+
+    accuracy                         1.0000      3983
+   macro avg     1.0000    1.0000    1.0000      3983
+weighted avg     1.0000    1.0000    1.0000      3983
+
+
+VALIDATION
+Loss: 5.9358
+Accuracy: 0.3937
+Macro-F1: 0.3396
+
+Reporte de clasificación:
+              precision    recall  f1-score   support
+
+    Agaricus     0.1935    0.1714    0.1818        70
+     Amanita     0.3725    0.3826    0.3775       149
+     Boletus     0.6093    0.6121    0.6107       214
+ Cortinarius     0.2222    0.2169    0.2195       166
+    Entoloma     0.3617    0.2361    0.2857        72
+   Hygrocybe     0.5676    0.3333    0.4200        63
+   Lactarius     0.4204    0.4651    0.4416       301
+     Russula     0.3723    0.4454    0.4056       229
+     Suillus     0.1395    0.0968    0.1143        62
+
+    accuracy                         0.3937      1326
+   macro avg     0.3621    0.3289    0.3396      1326
+weighted avg     0.3911    0.3937    0.3892      1326
+
+
+(Test solo como referencia, no se usa para tomar decisiones)
+
+TEST
+Loss: 6.1990
+Accuracy: 0.3943
+Macro-F1: 0.3408
+
+Reporte de clasificación:
+              precision    recall  f1-score   support
+
+    Agaricus     0.2143    0.2113    0.2128        71
+     Amanita     0.4069    0.3907    0.3986       151
+     Boletus     0.5656    0.5841    0.5747       214
+ Cortinarius     0.3333    0.3095    0.3210       168
+    Entoloma     0.2157    0.1486    0.1760        74
+   Hygrocybe     0.5000    0.3492    0.4112        63
+   Lactarius     0.3894    0.4618    0.4225       301
+     Russula     0.3831    0.4148    0.3983       229
+     Suillus     0.1905    0.1270    0.1524        63
+
+    accuracy                         0.3943      1334
+   macro avg     0.3554    0.3330    0.3408      1334
+weighted avg     0.3884    0.3943    0.3892      1334
+
+
+Resumen de métricas:
+     split   loss  accuracy  macro_f1
+     train 0.0001    1.0000    1.0000
+validation 5.9358    0.3937    0.3396
+      test 6.1990    0.3943    0.3408
+
+Generalization gap (Macro-F1, train - validation): 0.6604
+Generalization gap (Accuracy, train - validation): 0.6063
+Diferencia de loss (validation - train): 5.9357
+
+Confusiones más frecuentes en validación (real -> predicha):
+Lactarius -> Russula: 55
+Russula -> Lactarius: 48
+Lactarius -> Cortinarius: 37
+Boletus -> Lactarius: 35
+Amanita -> Russula: 29
+Cortinarius -> Russula: 28
+Cortinarius -> Lactarius: 28
+Suillus -> Lactarius: 26
+
+Resultados guardados en: /Users/ivanfv/desarrollodesoftware/tc3009c/periodo2/portafolio-modulo-7/results/base
