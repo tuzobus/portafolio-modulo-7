@@ -1,0 +1,13 @@
+,precision,recall,f1-score,support
+Agaricus,1.0,1.0,1.0,210.0
+Amanita,1.0,1.0,1.0,448.0
+Boletus,1.0,1.0,1.0,642.0
+Cortinarius,1.0,1.0,1.0,500.0
+Entoloma,1.0,1.0,1.0,218.0
+Hygrocybe,1.0,1.0,1.0,189.0
+Lactarius,1.0,1.0,1.0,903.0
+Russula,1.0,1.0,1.0,687.0
+Suillus,1.0,1.0,1.0,186.0
+accuracy,1.0,1.0,1.0,1.0
+macro avg,1.0,1.0,1.0,3983.0
+weighted avg,1.0,1.0,1.0,3983.0

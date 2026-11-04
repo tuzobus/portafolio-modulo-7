@@ -1,0 +1,10 @@
+layer,type,output_shape,params
+conv2d,Conv2D,"(None, 150, 150, 32)",896
+max_pooling2d,MaxPooling2D,"(None, 75, 75, 32)",0
+conv2d_1,Conv2D,"(None, 75, 75, 64)",18496
+max_pooling2d_1,MaxPooling2D,"(None, 37, 37, 64)",0
+conv2d_2,Conv2D,"(None, 37, 37, 128)",73856
+max_pooling2d_2,MaxPooling2D,"(None, 18, 18, 128)",0
+flatten,Flatten,"(None, 41472)",0
+dense,Dense,"(None, 128)",5308544
+dense_1,Dense,"(None, 9)",1161
