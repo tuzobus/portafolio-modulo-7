@@ -1,19 +1,28 @@
 import sys
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 from tensorflow.keras import models
-from tensorflow.keras.preprocessing import image
 
-from config import BASE_MODEL_PATH, TEST_DIR, RESULTS_DIR, IMG_SIZE, CLASS_NAMES
+from config import BASE_MODEL_PATH, TEST_DIR, RESULTS_DIR, CLASS_NAMES
+from config import BASE_DIR
+from inference import load_and_preprocess, real_class_of
 
 # PREDICCIONES CON MODELO ENTRENADO
 # uv run predict.py - predice 8 imágenes al azar del set de test
+# uv run predict.py ruta/imagen.jpg - predice una imagen descargada
+# uv run predict.py https://.../imagen.jpg - predice una imagen de internet
+# (se pueden indicar varias rutas o URLs separadas por espacios)
 
 OUTPUT_DIR = RESULTS_DIR / "predictions"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# carpeta donde se guardan las imágenes descargadas de internet
+DOWNLOAD_DIR = BASE_DIR / "data" / "downloads"
 
 if not BASE_MODEL_PATH.exists():
     raise FileNotFoundError(
@@ -21,22 +30,6 @@ if not BASE_MODEL_PATH.exists():
     )
 
 model = models.load_model(BASE_MODEL_PATH)
-
-
-# redimensiona a IMG_SIZE, convierte a arreglo, agrega la dimensión
-# del lote y escala a 0-1
-def load_and_preprocess(img_path):
-    img = image.load_img(img_path, target_size=IMG_SIZE)
-    img_tensor = image.img_to_array(img)
-    img_tensor = np.expand_dims(img_tensor, axis=0)
-    img_tensor /= 255.0
-    return img_tensor
-
-
-# obtiene clase de imagen a partir de carpeta
-def real_class_of(img_path):
-    folder = Path(img_path).parent.name
-    return folder if folder in CLASS_NAMES else None
 
 
 def predict_image(img_path):
@@ -61,6 +54,71 @@ def predict_image(img_path):
         print(f"  {CLASS_NAMES[k]:<22} {confidence[k] * 100:6.2f} %")
 
     return img_tensor[0], confidence, predicted_index, real_class
+
+
+# si se recibe una URL, descarga la imagen a data/downloads y regresa su ruta
+# si se recibe una ruta local, solo revisa que exista
+def get_image_path(source):
+    if not source.startswith(("http://", "https://")):
+        if not Path(source).exists():
+            raise FileNotFoundError(f"No existe el archivo {source}")
+        return Path(source)
+
+    DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+    # nombre del archivo tomado de la URL
+    file_name = Path(urllib.parse.urlparse(source).path).name
+    if file_name == "":
+        file_name = "imagen_descargada.jpg"
+    file_path = DOWNLOAD_DIR / file_name
+
+    request = urllib.request.Request(source, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(request, timeout=30) as response:
+        file_path.write_bytes(response.read())
+
+    print(f"\nImagen descargada en: {file_path}")
+    return file_path
+
+
+# imágenes indicadas en la consola (rutas locales o URLs)
+# para cada una muestra la imagen y la distribución de probabilidad de las clases
+if len(sys.argv) > 1:
+    for source in sys.argv[1:]:
+        try:
+            img_path = get_image_path(source)
+            img, confidence, predicted_index, real_class = predict_image(img_path)
+        except Exception as error:
+            # si una imagen falla
+            # se avisa y se continúa con las demás
+            print(f"\nNo se pudo predecir {source}: {error}")
+            if source.startswith(("http://", "https://")):
+                print("Revisa que la URL abra directamente la imagen (.jpg, .png)")
+            continue
+
+        fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+
+        axes[0].imshow(img)
+        axes[0].axis("off")
+        title = f"Predicción: {CLASS_NAMES[predicted_index]}"
+        if real_class is not None:
+            title = f"Real: {real_class}\n" + title
+        axes[0].set_title(title)
+
+        colors = ["tab:gray"] * len(CLASS_NAMES)
+        colors[predicted_index] = "tab:blue"
+        axes[1].barh(CLASS_NAMES, confidence, color=colors)
+        axes[1].invert_yaxis()
+        axes[1].set_xlim(0, 1)
+        axes[1].set_xlabel("Probabilidad")
+        axes[1].set_title("Distribución de probabilidad (softmax)")
+
+        plt.tight_layout()
+        out_file = OUTPUT_DIR / f"prediction_{Path(img_path).stem}.png"
+        plt.savefig(out_file, dpi=300, bbox_inches="tight")
+        print(f"Figura guardada en: {out_file}")
+
+    plt.show()
+    sys.exit()
 
 
 # elige 8 imágenes al azar distintas de test en cada ejecución

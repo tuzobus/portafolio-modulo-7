@@ -19,6 +19,10 @@ RESULTS_DIR = BASE_DIR / "results"
 
 BASE_MODEL_PATH = MODELS_DIR / "base_cnn.keras"
 
+MODELS = {
+    "base": {"name": "CNN base", "path": BASE_MODEL_PATH},
+}
+
 IMG_SIZE = (150, 150)
 BATCH_SIZE = 32
 EPOCHS = 25
