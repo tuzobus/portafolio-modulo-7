@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clasificador de hongos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Clasificador de hongos</h1>
+        <p>Predice a cuál de los 9 géneros pertenece el hongo de una imagen</p>
+      </header>
+
+      <section class="panel">
+        <label class="field-label" for="model">Seleccionar modelo</label>
+        <select id="model" {{ "disabled" if not models }}>
+          {% for model_id, info in models.items() %}
+          <option value="{{ model_id }}">{{ info.name }}</option>
+          {% else %}
+          <option>No hay modelos entrenados</option>
+          {% endfor %}
+        </select>
+
+        <label class="dropzone" id="dropzone">
+          <input id="file" type="file" accept="image/*" />
+          <strong>Arrastra una imagen aquí</strong>
+          <span>o haz clic para elegir un archivo (max 10 MB)</span>
+        </label>
+
+        <div class="divider"><span>o</span></div>
+
+        <form id="url-form" class="url-row">
+          <label class="visually-hidden" for="url">Enlace a una imagen</label>
+          <input id="url" type="url" placeholder="Pega el enlace a una imagen: https://..." required />
+          <button type="submit" class="primary">Predecir</button>
+        </form>
+
+        <div class="divider"><span>o</span></div>
+
+        <button id="random" type="button" class="secondary">
+          Predecir 8 imágenes aleatorias del set de test
+        </button>
+      </section>
+
+      <p id="status" class="status" role="status" hidden></p>
+      <section id="results" aria-label="Resultados"></section>
+    </main>
+  </body>
+</html>
