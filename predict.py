@@ -7,10 +7,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from tensorflow.keras import models
-from tensorflow.keras.preprocessing import image
 
-from config import BASE_MODEL_PATH, TEST_DIR, RESULTS_DIR, IMG_SIZE, CLASS_NAMES
+from config import BASE_MODEL_PATH, TEST_DIR, RESULTS_DIR, CLASS_NAMES
 from config import BASE_DIR
+from inference import load_and_preprocess, real_class_of
 
 # PREDICCIONES CON MODELO ENTRENADO
 # uv run predict.py - predice 8 imágenes al azar del set de test
@@ -30,22 +30,6 @@ if not BASE_MODEL_PATH.exists():
     )
 
 model = models.load_model(BASE_MODEL_PATH)
-
-
-# redimensiona a IMG_SIZE, convierte a arreglo, agrega la dimensión
-# del lote y escala a 0-1
-def load_and_preprocess(img_path):
-    img = image.load_img(img_path, target_size=IMG_SIZE)
-    img_tensor = image.img_to_array(img)
-    img_tensor = np.expand_dims(img_tensor, axis=0)
-    img_tensor /= 255.0
-    return img_tensor
-
-
-# obtiene clase de imagen a partir de carpeta
-def real_class_of(img_path):
-    folder = Path(img_path).parent.name
-    return folder if folder in CLASS_NAMES else None
 
 
 def predict_image(img_path):
