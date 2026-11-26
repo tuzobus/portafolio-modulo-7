@@ -6,18 +6,23 @@ import numpy as np
 from tensorflow.keras import models
 from tensorflow.keras.preprocessing import image
 
-from config import CLASS_NAMES, IMG_SIZE, MODELS
+from config import CLASS_NAMES, MODELS
 
 # FUNCIONES DE PREDICCION para predict.py y app.py
 
 
-# redimensiona a IMG_SIZE, convierte a arreglo, agrega la dimensión
-# del lote y escala a 0-1
-def load_and_preprocess(img_source):
-    img = image.load_img(img_source, target_size=IMG_SIZE)
+# prepara una imagen igual que en el entrenamiento del modelo elegido:
+# redimensiona a su img_size, convierte a arreglo y agrega la dimensión
+# del lote.
+# - CNN escalan a 0-1
+# - EfficientNet recibe 0-255 (ya trae su propia normalización dentro del modelo)
+def load_and_preprocess(img_source, model_id):
+    settings = MODELS[model_id]
+    img = image.load_img(img_source, target_size=settings["img_size"])
     img_tensor = image.img_to_array(img)
     img_tensor = np.expand_dims(img_tensor, axis=0)
-    img_tensor /= 255.0
+    if settings["rescale"] is not None:
+        img_tensor *= settings["rescale"]
     return img_tensor
 
 
