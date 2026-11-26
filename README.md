@@ -54,7 +54,7 @@ uv run train_improved_2.py   # 6. Fine-tuning del modelo 5 -> results/improved_2
 | Modelo | Script | Archivo en `models/` | Tiempo aprox. (CPU MacBook Air M1) |
 |---|---|---|---|
 | CNN base | `train_base.py` | `base_cnn.keras` | 18 min |
-| CNN regularizada | `train_regularized.py` | `regularized_cnn.keras` | PENDIENTE |
+| CNN regularizada | `train_regularized.py` | `regularized_cnn.keras` | 44 min |
 | EfficientNetB0 (transfer learning) | `train_improved_1.py` | `improved_1_efficientnet.keras` | 39 min |
 | EfficientNetB0 + fine-tuning | `train_improved_2.py` | `improved_2_finetuned.keras` | 36 min |
 
