@@ -6,17 +6,20 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
-from tensorflow.keras import models
-
-from config import BASE_MODEL_PATH, TEST_DIR, RESULTS_DIR, CLASS_NAMES
+from config import TEST_DIR, RESULTS_DIR, CLASS_NAMES, MODELS
 from config import BASE_DIR
-from inference import load_and_preprocess, real_class_of
+from inference import load_and_preprocess, real_class_of, get_model
 
 # PREDICCIONES CON MODELO ENTRENADO
 # uv run predict.py - predice 8 imágenes al azar del set de test
 # uv run predict.py ruta/imagen.jpg - predice una imagen descargada
 # uv run predict.py https://.../imagen.jpg - predice una imagen de internet
 # (se pueden indicar varias rutas o URLs separadas por espacios)
+#
+# por defecto usa el modelo base. para usar otro se agrega --model al inicio:
+# uv run predict.py --model improved_2
+# uv run predict.py --model regularized ruta/imagen.jpg
+# opciones: base, regularized, improved_1, improved_2
 
 OUTPUT_DIR = RESULTS_DIR / "predictions"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -24,16 +27,32 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # carpeta donde se guardan las imágenes descargadas de internet
 DOWNLOAD_DIR = BASE_DIR / "data" / "downloads"
 
-if not BASE_MODEL_PATH.exists():
+# selección del modelo con --model
+args = sys.argv[1:]
+model_id = "base"
+if len(args) >= 2 and args[0] == "--model":
+    model_id = args[1]
+    args = args[2:]
+
+if model_id not in MODELS:
+    raise ValueError(f"Modelo desconocido: {model_id}. Opciones: {list(MODELS)}")
+
+model_path = MODELS[model_id]["path"]
+if not model_path.exists():
     raise FileNotFoundError(
-        f"No se encontró el modelo en {BASE_MODEL_PATH}. Ejecuta primero train_base.py"
+        f"No se encontró el modelo en {model_path}. Entrena el modelo primero."
     )
 
-model = models.load_model(BASE_MODEL_PATH)
+model = get_model(model_id)
+model_name = MODELS[model_id]["name"]
+print(f"\nModelo: {model_name} ({model_path.name})")
+
+# sufijo para no sobrescribir las figuras de otro modelo
+suffix = "" if model_id == "base" else f"_{model_id}"
 
 
 def predict_image(img_path):
-    img_tensor = load_and_preprocess(img_path)
+    img_tensor = load_and_preprocess(img_path, model_id)
 
     # probabilidad de cada una de las 9 clases
     confidence = model.predict(img_tensor, verbose=0)[0]
@@ -53,7 +72,13 @@ def predict_image(img_path):
     for k in top3:
         print(f"  {CLASS_NAMES[k]:<22} {confidence[k] * 100:6.2f} %")
 
-    return img_tensor[0], confidence, predicted_index, real_class
+    # imagen en 0-1 para mostrarla con matplotlib
+    # Efficientnet recibe la imagen en 0-255
+    img_display = img_tensor[0]
+    if MODELS[model_id]["rescale"] is None:
+        img_display = img_display / 255.0
+
+    return img_display, confidence, predicted_index, real_class
 
 
 # si se recibe una URL, descarga la imagen a data/downloads y regresa su ruta
@@ -82,8 +107,8 @@ def get_image_path(source):
 
 # imágenes indicadas en la consola (rutas locales o URLs)
 # para cada una muestra la imagen y la distribución de probabilidad de las clases
-if len(sys.argv) > 1:
-    for source in sys.argv[1:]:
+if len(args) > 0:
+    for source in args:
         try:
             img_path = get_image_path(source)
             img, confidence, predicted_index, real_class = predict_image(img_path)
@@ -99,9 +124,9 @@ if len(sys.argv) > 1:
 
         axes[0].imshow(img)
         axes[0].axis("off")
-        title = f"Predicción: {CLASS_NAMES[predicted_index]}"
+        title = f"{model_name}\nPredicción: {CLASS_NAMES[predicted_index]}"
         if real_class is not None:
-            title = f"Real: {real_class}\n" + title
+            title = f"{model_name}\nReal: {real_class}\nPredicción: {CLASS_NAMES[predicted_index]}"
         axes[0].set_title(title)
 
         colors = ["tab:gray"] * len(CLASS_NAMES)
@@ -113,7 +138,7 @@ if len(sys.argv) > 1:
         axes[1].set_title("Distribución de probabilidad (softmax)")
 
         plt.tight_layout()
-        out_file = OUTPUT_DIR / f"prediction_{Path(img_path).stem}.png"
+        out_file = OUTPUT_DIR / f"prediction_{Path(img_path).stem}{suffix}.png"
         plt.savefig(out_file, dpi=300, bbox_inches="tight")
         print(f"Figura guardada en: {out_file}")
 
@@ -146,9 +171,9 @@ for ax, idx in zip(axes.ravel(), chosen):
 
 print(f"\nAciertos: {n_correct} de {len(chosen)}")
 
-plt.suptitle("Predicciones sobre imágenes al azar del set de test")
+plt.suptitle(f"Predicciones sobre imágenes al azar del set de test ({model_name})")
 plt.tight_layout()
-out_file = OUTPUT_DIR / "random_test_predictions.png"
+out_file = OUTPUT_DIR / f"random_test_predictions{suffix}.png"
 plt.savefig(out_file, dpi=300, bbox_inches="tight")
 print(f"Figura guardada en: {out_file}")
 

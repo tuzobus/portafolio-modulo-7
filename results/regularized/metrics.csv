@@ -1,0 +1,4 @@
+split,loss,accuracy,macro_f1
+train,0.994,0.6478,0.602
+validation,1.27,0.5543,0.477
+test,1.2862,0.545,0.4831

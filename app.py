@@ -86,7 +86,7 @@ def predict_images(model_id, images):
 
     try:
         batch = np.concatenate(
-            [load_and_preprocess(io.BytesIO(data)) for _, data, _ in images]
+            [load_and_preprocess(io.BytesIO(data), model_id) for _, data, _ in images]
         )
         thumbnails = [make_thumbnail(data) for _, data, _ in images]
     except (OSError, ValueError, Image.DecompressionBombError) as error:
